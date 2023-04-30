@@ -1,3 +1,7 @@
+use file::reader::FileReader;
+
+pub mod file;
+
 fn main() {
-    println!("Hello, world!");
+    
 }

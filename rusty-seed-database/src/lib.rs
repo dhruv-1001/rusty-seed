@@ -1,14 +1,20 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+pub mod sleddb;
+pub mod error;
+use sleddb::SledDatabase;
+
+pub struct Database {
+    sled: SledDatabase
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[allow(unused_variables)]
+impl Database {
+    // Open and return existing database, if not present, it create and return a new one
+    fn open() {
+        todo!()
+    }
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    // creates a new database and return 
+    fn new() {
+        todo!()
     }
 }
