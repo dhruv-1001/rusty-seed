@@ -4,4 +4,6 @@ members = [
     "rusty-seed-server",
     "rusty-seed-client",
     "rusty-seed-database",
+    "rusty-seed-cli",
+    "rusty-seed-core"
 ]

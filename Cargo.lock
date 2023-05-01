@@ -235,7 +235,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "rusty-seed-cli"
+version = "0.1.0"
+
+[[package]]
 name = "rusty-seed-client"
+version = "0.1.0"
+
+[[package]]
+name = "rusty-seed-core"
 version = "0.1.0"
 
 [[package]]
