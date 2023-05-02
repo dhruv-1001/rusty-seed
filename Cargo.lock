@@ -245,6 +245,9 @@ version = "0.1.0"
 [[package]]
 name = "rusty-seed-core"
 version = "0.1.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "rusty-seed-database"
@@ -260,6 +263,7 @@ dependencies = [
 name = "rusty-seed-server"
 version = "0.1.0"
 dependencies = [
+ "rusty-seed-core",
  "rusty-seed-database",
  "sha1",
 ]

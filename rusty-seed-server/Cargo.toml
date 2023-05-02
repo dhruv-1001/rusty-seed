@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 sha1 = "0.10.5"
 rusty-seed-database = { path = "../rusty-seed-database" }
+rusty-seed-core = { path = "../rusty-seed-core" }
