@@ -1,7 +1,4 @@
-use std::{
-    // sync::mpsc,
-    thread,
-};
+use std::thread;
 
 // use rusty_seed_core::message::Message;
 
