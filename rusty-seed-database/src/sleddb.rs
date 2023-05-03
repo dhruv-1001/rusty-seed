@@ -28,7 +28,7 @@ impl SledDatabase {
         self.db.insert(hash, serialized_file).unwrap();
     }
 
-    pub fn get_path(&self, hash: String) -> File {
+    pub fn get_file(&self, hash: String) -> File {
         deserialize(&self.db.get(hash).unwrap().unwrap()).unwrap()
     }
 
@@ -54,14 +54,19 @@ mod test {
     use super::SledDatabase;
 
     #[test]
-    fn test() {
+    fn test_add_and_get_file() {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push(".test-db");
+
         let mut sled_db = SledDatabase::open(path.as_path());
+
         let file_path = Path::new("path/for/test");
+
         sled_db.add_file("1234".to_string(), file_path);
-        let file = sled_db.get_path("1234".to_string());
+        let file = sled_db.get_file("1234".to_string());
+
         assert_eq!("path/for/test".to_string(), file.path);
+
         std::fs::remove_dir_all(path).unwrap();
     }
 }
