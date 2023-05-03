@@ -129,13 +129,17 @@ fn handle_subcommand(opts: CliOpts) {
             path,
             num_files,
             size,
-        } => match generate_test_dir(name, path, num_files, size) {
-            Ok(()) => {
-                println!("Success!")
+        } => {
+            let time = SystemTime::now();
+            match generate_test_dir(name, path, num_files, size) {
+                Ok(()) => {
+                    let time = SystemTime::now().duration_since(time).unwrap();
+                    println!("Success in {} s", time.as_secs_f32());
+                }
+                Err(e) => {
+                    eprintln!("{}", e)
+                }
             }
-            Err(e) => {
-                eprintln!("{}", e)
-            }
-        },
+        }
     }
 }

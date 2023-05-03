@@ -10,13 +10,14 @@ pub fn generate_test_file(
     let mut file = std::fs::File::create(path)?;
 
     let buffer = [0u8; 8192];
-    let mut remaining_size = size as u64;
+    let buffer_len = buffer.len();
+    let mut remaining_size = size;
 
-    while remaining_size > 0 {
-        let chunk_size = std::cmp::min(buffer.len() as u64, remaining_size) as usize;
-        file.write_all(&buffer[..chunk_size])?;
-        remaining_size -= chunk_size as u64
+    while remaining_size > buffer_len {
+        file.write_all(&buffer[..(buffer_len)])?;
+        remaining_size -= buffer_len
     }
+    file.write_all(&buffer[..(remaining_size)])?;
 
     Ok(())
 }
