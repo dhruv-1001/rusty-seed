@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
+use std::{path::PathBuf, time::SystemTime};
 use utils::{generate_test_dir, generate_test_file};
 
 mod utils;
@@ -54,7 +54,7 @@ pub enum Command {
         name: String,
 
         /// Path to generate file to
-        #[clap(long, default_value = "~/.rusty-seed")]
+        #[clap(long, default_value = "$HOME/.rusty-seed")]
         path: PathBuf,
 
         /// File size in bytes
@@ -69,7 +69,7 @@ pub enum Command {
         name: String,
 
         /// Path to generate directory to
-        #[clap(long, default_value = "~/.rusty-seed")]
+        #[clap(long, default_value = "$HOME/.rusty-seed")]
         path: PathBuf,
 
         /// Number of files to be generated
@@ -113,9 +113,11 @@ fn handle_subcommand(opts: CliOpts) {
         }
         Command::Stop => todo!(),
         Command::GenerateTestFile { name, path, size } => {
+            let time = SystemTime::now();
             match generate_test_file(name, path, size) {
                 Ok(()) => {
-                    println!("Success!")
+                    let time = SystemTime::now().duration_since(time).unwrap();
+                    println!("Success in {} s", time.as_secs_f32());
                 }
                 Err(e) => {
                     eprintln!("{}", e)
@@ -127,6 +129,13 @@ fn handle_subcommand(opts: CliOpts) {
             path,
             num_files,
             size,
-        } => generate_test_dir(name, path, num_files, size),
+        } => match generate_test_dir(name, path, num_files, size) {
+            Ok(()) => {
+                println!("Success!")
+            }
+            Err(e) => {
+                eprintln!("{}", e)
+            }
+        },
     }
 }
