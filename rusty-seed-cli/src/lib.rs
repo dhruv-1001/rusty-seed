@@ -97,7 +97,7 @@ impl RustySeedCli {
 }
 
 fn handle_subcommand(opts: CliOpts) {
-    // TODO: create client that will send requests to listener on server and client
+    // TODO: create API to send requests to listener on server and client
 
     match opts.command {
         Command::AddPath { path } => {
