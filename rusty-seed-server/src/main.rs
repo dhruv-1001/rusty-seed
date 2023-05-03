@@ -1,16 +1,16 @@
 use std::{
-    sync::{mpsc, Arc, Mutex},
+    // sync::mpsc,
     thread,
 };
 
-use rusty_seed_core::message::Message;
+// use rusty_seed_core::message::Message;
 
 pub mod local;
 pub mod server;
 
 fn main() {
     // TODO: start listening on a port for requests from cli & client
-    let (local_sender, local_receiver) = mpsc::channel::<Message>();
+    // let (local_sender, local_receiver) = mpsc::channel::<Message>();
 
     let local_handle = thread::spawn(|| {
         local::run();
