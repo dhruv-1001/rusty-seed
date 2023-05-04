@@ -16,3 +16,4 @@ path = "src/lib.rs"
 [dependencies]
 clap = { version = "4.2.7", features = ["derive"] }
 rand = "0.8.5"
+rusty-seed-core = { path = "../rusty-seed-core" }

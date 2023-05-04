@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use rusty_seed_core as core;
 use std::{path::PathBuf, time::SystemTime};
 use utils::{generate_test_dir, generate_test_file};
 
@@ -54,8 +55,8 @@ pub enum Command {
         name: String,
 
         /// Path to generate file to
-        #[clap(long, default_value = "$HOME/.rusty-seed")]
-        path: PathBuf,
+        #[clap(long)]
+        path: Option<PathBuf>,
 
         /// File size in bytes
         #[clap(long)]
@@ -69,8 +70,8 @@ pub enum Command {
         name: String,
 
         /// Path to generate directory to
-        #[clap(long, default_value = "$HOME/.rusty-seed")]
-        path: PathBuf,
+        #[clap(long)]
+        path: Option<PathBuf>,
 
         /// Number of files to be generated
         #[clap(long)]
@@ -113,6 +114,13 @@ fn handle_subcommand(opts: CliOpts) {
         }
         Command::Stop => todo!(),
         Command::GenerateTestFile { name, path, size } => {
+            let path = match path {
+                Some(path) => path,
+                None => {
+                    println!("No path provided, using default path: $HOME/.rustyseed",);
+                    core::utils::default_database_path()
+                }
+            };
             let time = SystemTime::now();
             match generate_test_file(name, path, size) {
                 Ok(()) => {
@@ -130,6 +138,13 @@ fn handle_subcommand(opts: CliOpts) {
             num_files,
             size,
         } => {
+            let path = match path {
+                Some(path) => path,
+                None => {
+                    println!("No path provided, using default path: $HOME/.rustyseed",);
+                    core::utils::default_database_path()
+                }
+            };
             let time = SystemTime::now();
             match generate_test_dir(name, path, num_files, size) {
                 Ok(()) => {
