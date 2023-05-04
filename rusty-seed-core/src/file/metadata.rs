@@ -90,7 +90,7 @@ impl FileMetadata {
     pub fn from(path: PathBuf) -> Result<Self, FileError> {
         let file_system = FileSystem::from_path(path.clone())?;
         Ok(FileMetadata {
-            file_path: path.clone(),
+            file_path: path,
             file_system: file_system.clone(),
             seed_size: file_system.size(0),
             can_seed: true,

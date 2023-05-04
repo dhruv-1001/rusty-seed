@@ -83,11 +83,12 @@ pub enum Command {
     },
 }
 
+#[derive(Default)]
 pub struct RustySeedCli;
 
 impl RustySeedCli {
     pub fn new() -> Self {
-        RustySeedCli
+        RustySeedCli::default()
     }
 
     pub fn run(&self) {
@@ -102,10 +103,10 @@ fn handle_subcommand(opts: CliOpts) {
 
     match opts.command {
         Command::AddPath { path } => {
-            println!("{}", path.as_path().to_str().unwrap().to_string())
+            println!("{}", path.as_path().to_str().unwrap())
         }
         Command::RemovePath { path } => {
-            println!("{}", path.as_path().to_str().unwrap().to_string())
+            println!("{}", path.as_path().to_str().unwrap())
         }
         Command::ListSeedingPaths => todo!(),
         Command::ListAllPaths => todo!(),
