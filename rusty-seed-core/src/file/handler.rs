@@ -1,7 +1,8 @@
 use std::{
     cmp::min,
-    fs::File,
+    fs::{File, OpenOptions},
     io::{Read, Seek},
+    os::unix::prelude::FileExt,
     path::PathBuf,
 };
 
@@ -57,5 +58,14 @@ impl FileHandler {
         file.read_exact(&mut buffer).unwrap();
 
         Ok((buffer, index, index + bytes_to_read - 1))
+    }
+
+    pub fn write(&self, index: u64, bytes: Vec<u8>, path: PathBuf) -> Result<(), FileError> {
+        let file = match OpenOptions::new().write(true).open(path) {
+            Ok(file) => file,
+            Err(_) => return Err(FileError::InvalidFilePath),
+        };
+        file.write_all_at(&bytes[..], index).unwrap();
+        Ok(())
     }
 }
