@@ -48,9 +48,11 @@ pub fn generate_test_dir(
     path.push(&generate_random_string(6));
     std::fs::create_dir_all(&path)?;
 
-    for _ in 0..nested_files {
+    for _ in 0..(nested_files - 1) {
         generate_random_file(path.clone(), file_size).unwrap();
     }
+    let remaining_size = file_size + size % num_files;
+    generate_random_file(path, remaining_size).unwrap();
 
     Ok(())
 }
