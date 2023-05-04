@@ -54,12 +54,12 @@ pub enum Command {
         #[clap(long, default_value = "test-file")]
         name: String,
 
-        /// Path to generate file to
+        /// Path to generate file to [default: $HOME/.rustyseed]
         #[clap(long)]
         path: Option<PathBuf>,
 
         /// File size in bytes
-        #[clap(long)]
+        #[clap(long, default_value = "2048")]
         size: usize,
     },
 
@@ -69,16 +69,16 @@ pub enum Command {
         #[clap(long, default_value = "test-dir")]
         name: String,
 
-        /// Path to generate directory to
+        /// Path to generate directory to [default: $HOME/.rustyseed]
         #[clap(long)]
         path: Option<PathBuf>,
 
         /// Number of files to be generated
-        #[clap(long)]
+        #[clap(long, default_value = "10")]
         num_files: usize,
 
         /// Directory size in bytes
-        #[clap(long)]
+        #[clap(long, default_value = "2048")]
         size: usize,
     },
 }

@@ -76,6 +76,24 @@ impl FileSystem {
             FileSystem::UnsupportedType => start,
         }
     }
+
+    pub fn fill_file_with_size(&self, files: &mut Vec<(PathBuf, u64)>) {
+        match self {
+            FileSystem::File {
+                name: _,
+                path,
+                file_size,
+            } => {
+                files.push((path.clone(), *file_size));
+            }
+            FileSystem::Directory { name: _, entries } => {
+                for entry in entries {
+                    entry.fill_file_with_size(files);
+                }
+            }
+            FileSystem::UnsupportedType => unreachable!(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

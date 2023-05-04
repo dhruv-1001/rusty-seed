@@ -53,8 +53,7 @@ fn hash_file(path: PathBuf, hasher: &mut CoreWrapper<Sha1Core>) {
         if bytes_read == 0 {
             break;
         }
-
-        Digest::update(hasher, &buffer);
+        Digest::update(hasher, &buffer[..bytes_read]);
     }
 }
 
