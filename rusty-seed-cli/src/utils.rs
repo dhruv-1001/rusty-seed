@@ -1,6 +1,7 @@
 use std::{io::Write, path::PathBuf};
 
 use rand::Rng;
+use rusty_seed_core::utils::FILE_READ_WRITE_BUFFER_SIZE;
 
 pub fn generate_test_file(
     name: String,
@@ -11,7 +12,7 @@ pub fn generate_test_file(
     path.push(name);
     let mut file = std::fs::File::create(path)?;
 
-    let buffer = [0u8; 8192];
+    let buffer = [0u8; FILE_READ_WRITE_BUFFER_SIZE];
     let buffer_len = buffer.len();
     let mut remaining_size = size;
 

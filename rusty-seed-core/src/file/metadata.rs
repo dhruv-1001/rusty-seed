@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use super::error::FileError;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-enum FileSystem {
+pub enum FileSystem {
     File {
         name: String,
         path: PathBuf,
@@ -80,10 +80,10 @@ impl FileSystem {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FileMetadata {
-    file_path: PathBuf,
-    file_system: FileSystem,
-    seed_size: u64,
-    can_seed: bool,
+    pub file_path: PathBuf,
+    pub file_system: FileSystem,
+    pub seed_size: u64,
+    pub can_seed: bool,
 }
 
 impl FileMetadata {

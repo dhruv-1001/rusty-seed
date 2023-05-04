@@ -6,6 +6,7 @@ pub struct SledDatabase {
     db: sled::Db,
 }
 
+// TODO: remove active field from here, we will keep that inside metadata, it's not good that we will have to update it in 2 different locations. I should just be present in one place
 #[derive(Debug, Serialize, Deserialize)]
 pub struct File {
     path: String,
