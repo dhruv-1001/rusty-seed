@@ -22,8 +22,7 @@ impl FileSystem {
     fn from_path(path: PathBuf) -> Result<FileSystem, FileError> {
         if !path.exists() {
             Err(FileError::InvalidFilePath)
-        }
-        else if path.is_file() {
+        } else if path.is_file() {
             Ok(FileSystem::File {
                 name: path.file_name().unwrap().to_string_lossy().to_string(),
                 path: path.clone(),
@@ -35,26 +34,46 @@ impl FileSystem {
                 .unwrap()
                 .map(|entry| FileSystem::from_path(entry.unwrap().path()).unwrap())
                 .collect();
-            Ok(FileSystem::Directory { name, entries })
+            let mut directory = FileSystem::Directory { name, entries };
+            directory.sort_entries();
+            Ok(directory)
         } else {
             Ok(FileSystem::UnsupportedType)
         }
     }
 
+    fn sort_entries(&mut self) {
+        if let FileSystem::Directory { name: _, entries } = self {
+            entries.sort_by_key(|entry| entry.name());
+        }
+    }
+
+    fn name(&self) -> String {
+        match self {
+            FileSystem::File {
+                name,
+                path: _,
+                file_size: _,
+            } => name.to_owned(),
+            FileSystem::Directory { name, entries: _ } => name.to_owned(),
+            FileSystem::UnsupportedType => unreachable!(),
+        }
+    }
+
     fn size(&self, mut start: u64) -> u64 {
         match self {
-            FileSystem::File { name: _, path: _, file_size } => { 
-                start + file_size
-            },
-            FileSystem::Directory { name: _, entries } => { 
+            FileSystem::File {
+                name: _,
+                path: _,
+                file_size,
+            } => start + file_size,
+            FileSystem::Directory { name: _, entries } => {
                 for entry in entries {
                     start += entry.size(0);
                 }
                 start
-            },
-            FileSystem::UnsupportedType => {  
-                start
-            },
+            }
+            FileSystem::UnsupportedType => start,
         }
     }
 }
@@ -64,7 +83,7 @@ pub struct FileMetadata {
     file_path: PathBuf,
     file_system: FileSystem,
     seed_size: u64,
-    can_seed: bool
+    can_seed: bool,
 }
 
 impl FileMetadata {
@@ -88,7 +107,7 @@ mod test {
     #[test]
     fn test_generate_meatdata() {
         let mut path = default_database_path();
-        path.push("bitcoin");
+        path.push("test-dir");
 
         let file_metadata = FileMetadata::from(path).unwrap();
         println!("{:#?}", file_metadata);
