@@ -46,7 +46,10 @@ impl FileHandler {
             }
         };
 
-        let mut file = File::open(file_path).unwrap();
+        let mut file = match File::open(file_path) {
+            Ok(file) => file,
+            Err(_) => return Err(FileError::InvalidFilePath),
+        };
         file.seek(std::io::SeekFrom::Start(index)).unwrap();
 
         let bytes_to_read = min(

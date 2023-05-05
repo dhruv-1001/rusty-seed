@@ -21,9 +21,13 @@ impl FileHash {
         let mut hasher = Sha1::new();
         hash(file_system, &mut hasher);
         let result = hasher.finalize();
-        FileHash {
+        Self {
             hash: format!("{:x}", result),
         }
+    }
+
+    pub fn from_string(hash: String) -> Self {
+        Self { hash }
     }
 }
 
