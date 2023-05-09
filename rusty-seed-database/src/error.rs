@@ -1,1 +1,4 @@
-pub enum DatabaseError {}
+pub enum DatabaseError {
+    SeedFileNotFound,
+    CustomError { error: String },
+}

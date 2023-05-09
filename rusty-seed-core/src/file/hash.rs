@@ -11,26 +11,6 @@ use crate::utils::FILE_READ_WRITE_BUFFER_SIZE;
 
 use super::metadata::FileSystem;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct FileHash {
-    pub hash: String,
-}
-
-impl FileHash {
-    pub fn from(file_system: FileSystem) -> Self {
-        let mut hasher = Sha1::new();
-        hash(file_system, &mut hasher);
-        let result = hasher.finalize();
-        Self {
-            hash: format!("{:x}", result),
-        }
-    }
-
-    pub fn from_string(hash: String) -> Self {
-        Self { hash }
-    }
-}
-
 fn hash(file_system: FileSystem, hasher: &mut CoreWrapper<Sha1Core>) {
     match file_system {
         FileSystem::File {
@@ -58,6 +38,32 @@ fn hash_file(path: PathBuf, hasher: &mut CoreWrapper<Sha1Core>) {
             break;
         }
         Digest::update(hasher, &buffer[..bytes_read]);
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct FileHash {
+    pub hash: String,
+}
+
+impl FileHash {
+    pub fn from(file_system: FileSystem) -> Self {
+        let mut hasher = Sha1::new();
+        hash(file_system, &mut hasher);
+        let result = hasher.finalize();
+        Self {
+            hash: format!("{:x}", result),
+        }
+    }
+
+    pub fn from_string(hash: String) -> Self {
+        Self { hash }
+    }
+}
+
+impl AsRef<[u8]> for FileHash {
+    fn as_ref(&self) -> &[u8] {
+        self.hash.as_bytes()
     }
 }
 

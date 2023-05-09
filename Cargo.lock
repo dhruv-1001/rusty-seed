@@ -492,6 +492,7 @@ name = "rusty-seed-database"
 version = "0.1.0"
 dependencies = [
  "bincode",
+ "rusty-seed-core",
  "serde",
  "sled",
  "tokio",

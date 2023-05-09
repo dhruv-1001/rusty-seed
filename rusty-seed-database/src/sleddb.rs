@@ -1,16 +1,19 @@
 use bincode::{deserialize, serialize};
+use rusty_seed_core::file::hash::FileHash;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
-pub struct SledDatabase {
-    db: sled::Db,
-}
+use crate::error::DatabaseError;
 
 // TODO: remove active field from here, we will keep that inside metadata, it's not good that we will have to update it in 2 different locations. I should just be present in one place
 #[derive(Debug, Serialize, Deserialize)]
-pub struct File {
-    path: String,
+pub struct SeedFile {
+    path: PathBuf,
     active: bool,
+}
+
+pub struct SledDatabase {
+    db: sled::Db,
 }
 
 #[allow(unused_variables)]
@@ -20,37 +23,66 @@ impl SledDatabase {
         Self { db }
     }
 
-    pub fn add_file(&mut self, hash: String, path: &Path) {
-        let file = File {
-            path: path.to_str().unwrap().to_string(),
+    pub fn add_seed_file(&mut self, hash: FileHash, path: PathBuf) {
+        let seed_file = SeedFile {
+            path: path,
             active: true,
         };
-        let serialized_file = serialize(&file).unwrap();
-        self.db.insert(hash, serialized_file).unwrap();
+        let serialized_seed = serialize(&seed_file).unwrap();
+        let serialized_hash = serialize(&hash).unwrap();
+        self.db.insert(serialized_hash, serialized_seed).unwrap();
     }
 
-    pub fn get_file(&self, hash: String) -> File {
-        deserialize(&self.db.get(hash).unwrap().unwrap()).unwrap()
+    pub fn get_seed_file(&self, hash: FileHash) -> SeedFile {
+        let hash = serialize(&hash).unwrap();
+        let seed_file: SeedFile = deserialize(&self.db.get(hash).unwrap().unwrap()).unwrap();
+        seed_file
     }
 
-    pub fn remove_file(&self, hash: String) {}
+    pub fn remove_seed_file(&self, hash: FileHash) -> Result<(), DatabaseError> {
+        let hash = serialize(&hash).unwrap();
+        let found = match self.db.contains_key(hash.clone()) {
+            Ok(found) => found,
+            Err(e) => {
+                return Err(DatabaseError::CustomError {
+                    error: e.to_string(),
+                })
+            }
+        };
+        if !found {
+            return Err(DatabaseError::SeedFileNotFound);
+        }
+        match self.db.remove(hash) {
+            Ok(_) => {}
+            Err(e) => {
+                return Err(DatabaseError::CustomError {
+                    error: e.to_string(),
+                })
+            }
+        };
+        Ok(())
+    }
 
-    pub fn remove_file_from_server(&self, hash: Option<String>) {}
+    pub fn get_all_seed_file(&self) -> Vec<(FileHash, SeedFile)> {
+        let mut seed_files: Vec<(FileHash, SeedFile)> = Vec::new();
+        self.db.iter().for_each(|item| {
+            if let Ok((key, value)) = item {
+                let hash: FileHash = deserialize(&key).unwrap();
+                let seed: SeedFile = deserialize(&value).unwrap();
+                seed_files.push((hash, seed))
+            }
+        });
+        seed_files
+    }
 
-    pub fn replace_with_hash(&self, hash: String, path: &Path) {}
-
-    pub fn replace_with_path(&self, hash: String, path: &Path) {}
-
-    pub fn get_all_files(&self, hash: String) {}
-
-    pub fn get_active_files(&self) {}
-
-    pub fn mark_inactive(&mut self, hash: String) {}
+    pub fn mark_inactive(&mut self, hash: FileHash) {}
 }
 
 #[cfg(test)]
 mod test {
-    use std::path::{Path, PathBuf};
+    use std::path::PathBuf;
+
+    use rusty_seed_core::file::hash::FileHash;
 
     use super::SledDatabase;
 
@@ -58,15 +90,27 @@ mod test {
     fn test_add_and_get_file() {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push(".test-db");
+        let mut seed_db = SledDatabase::open(path.as_path());
 
-        let mut sled_db = SledDatabase::open(path.as_path());
+        let file_hash_one = FileHash::from_string("1234".to_owned());
+        let file_path_one = PathBuf::from("path/for/test/one");
 
-        let file_path = Path::new("path/for/test");
+        let file_hash_two = FileHash::from_string("5678".to_owned());
+        let file_path_two = PathBuf::from("path/for/test/two");
 
-        sled_db.add_file("1234".to_string(), file_path);
-        let file = sled_db.get_file("1234".to_string());
+        seed_db.add_seed_file(file_hash_one.clone(), file_path_one);
+        seed_db.add_seed_file(file_hash_two.clone(), file_path_two);
 
-        assert_eq!("path/for/test".to_string(), file.path);
+        let file_one = seed_db.get_seed_file(file_hash_one);
+        let file_two = seed_db.get_seed_file(file_hash_two);
+
+        assert_eq!("path/for/test/one", file_one.path.to_str().unwrap());
+        assert_eq!("path/for/test/two", file_two.path.to_str().unwrap());
+
+        let seed_files = seed_db.get_all_seed_file();
+        for file in seed_files {
+            println!("{:?} {:?}", file.0, file.1);
+        }
 
         std::fs::remove_dir_all(path).unwrap();
     }
