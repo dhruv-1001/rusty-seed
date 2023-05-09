@@ -1,4 +1,4 @@
 pub mod error;
-pub mod handler;
+pub mod manager;
 pub mod hash;
 pub mod metadata;

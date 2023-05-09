@@ -12,12 +12,12 @@ use super::{error::FileError, metadata::FileMetadata};
 
 type Size = u64;
 
-pub struct FileHandler {
+pub struct FileManager {
     file_metadata: FileMetadata,
     files: Vec<(PathBuf, Size)>,
 }
 
-impl FileHandler {
+impl FileManager {
     pub fn new(file_metadata: FileMetadata) -> Self {
         let mut files = Vec::new();
         file_metadata.file_system.fill_file_with_size(&mut files);
