@@ -28,9 +28,9 @@ fn main() {
         None => default_database_path(),
     };
     // TODO: load database(s)
-    let seed_database = Arc::new(Mutex::new(Database::open(path.clone())));
+    let database = Arc::new(Mutex::new(Database::open(path.clone())));
     // TODO: verify downloads
-    DBValidator::validate(seed_database, path);
+    DBValidator::validate(database);
 
     // TODO: send request to client to continue uncomplete downloads
     // TODO: start listening to incoming connections connections and start seeding active paths

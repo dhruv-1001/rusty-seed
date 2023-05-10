@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{error::FileError, hash::FileHash};
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub enum FileSystem {
     File {
         name: String,
@@ -60,7 +60,11 @@ impl FileSystem {
         }
     }
 
-    fn size(&self, mut start: u64) -> u64 {
+    fn size(&self) -> u64 {
+        self.file_size(0)
+    }
+
+    fn file_size(&self, mut start: u64) -> u64 {
         match self {
             FileSystem::File {
                 name: _,
@@ -69,7 +73,7 @@ impl FileSystem {
             } => start + file_size,
             FileSystem::Directory { name: _, entries } => {
                 for entry in entries {
-                    start += entry.size(0);
+                    start += entry.file_size(0);
                 }
                 start
             }
@@ -96,12 +100,11 @@ impl FileSystem {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct FileMetadata {
     pub file_path: PathBuf,
     pub file_system: FileSystem,
     pub seed_size: u64,
-    pub can_seed: bool,
     pub file_hash: FileHash,
 }
 
@@ -111,8 +114,7 @@ impl FileMetadata {
         Ok(Self {
             file_path: path,
             file_system: file_system.clone(),
-            seed_size: file_system.size(0),
-            can_seed: true,
+            seed_size: file_system.size(),
             file_hash: FileHash::from(file_system),
         })
     }

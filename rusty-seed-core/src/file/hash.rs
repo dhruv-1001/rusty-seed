@@ -41,7 +41,7 @@ fn hash_file(path: PathBuf, hasher: &mut CoreWrapper<Sha1Core>) {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct FileHash {
     pub hash: String,
 }

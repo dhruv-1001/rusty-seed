@@ -7,9 +7,9 @@ use crate::error::DatabaseError;
 
 // TODO: remove active field from here, we will keep that inside metadata, it's not good that we will have to update it in 2 different locations. I should just be present in one place
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SeedFile {
-    path: PathBuf,
-    active: bool,
+pub struct SeedFileInfo {
+    pub path: PathBuf,
+    pub active: bool,
 }
 
 pub struct SeedDatabase {
@@ -24,7 +24,7 @@ impl SeedDatabase {
     }
 
     pub fn add_seed_file(&self, hash: FileHash, path: PathBuf) -> Result<(), DatabaseError> {
-        let seed_file = SeedFile {
+        let seed_file = SeedFileInfo {
             path: path,
             active: true,
         };
@@ -40,8 +40,15 @@ impl SeedDatabase {
         }
     }
 
-    pub fn get_seed_file(&self, hash: FileHash) -> Result<SeedFile, DatabaseError> {
-        let hash = serialize(&hash).unwrap();
+    pub fn check_if_seeding(&self, file_hash: FileHash) -> Result<bool, DatabaseError> {
+        match self.get_seed_file(file_hash) {
+            Ok(seed_file_info) => Ok(seed_file_info.active),
+            Err(e) => return Err(e),
+        }
+    }
+
+    fn get_seed_file(&self, file_hash: FileHash) -> Result<SeedFileInfo, DatabaseError> {
+        let hash: Vec<u8> = serialize(&file_hash).unwrap();
         let seed_file = match self.db.get(hash) {
             Ok(seed_file) => seed_file,
             Err(e) => {
@@ -59,8 +66,8 @@ impl SeedDatabase {
         }
     }
 
-    pub fn remove_seed_file(&self, hash: FileHash) -> Result<(), DatabaseError> {
-        let hash = serialize(&hash).unwrap();
+    pub fn remove_seed_file(&self, file_hash: FileHash) -> Result<(), DatabaseError> {
+        let hash = serialize(&file_hash).unwrap();
         let found = match self.db.contains_key(hash.clone()) {
             Ok(found) => found,
             Err(e) => {
@@ -83,12 +90,12 @@ impl SeedDatabase {
         Ok(())
     }
 
-    pub fn get_all_seed_file(&self) -> Vec<(FileHash, SeedFile)> {
-        let mut seed_files: Vec<(FileHash, SeedFile)> = Vec::new();
+    pub fn get_all_seed_file(&self) -> Vec<(FileHash, SeedFileInfo)> {
+        let mut seed_files: Vec<(FileHash, SeedFileInfo)> = Vec::new();
         self.db.iter().for_each(|item| {
             if let Ok((key, value)) = item {
                 let hash: FileHash = deserialize(&key).unwrap();
-                let seed: SeedFile = deserialize(&value).unwrap();
+                let seed: SeedFileInfo = deserialize(&value).unwrap();
                 seed_files.push((hash, seed))
             }
         });

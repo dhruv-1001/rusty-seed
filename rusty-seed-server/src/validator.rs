@@ -1,23 +1,26 @@
 use std::{
-    path::PathBuf,
     sync::{Arc, Mutex},
     thread,
 };
 
-use rusty_seed_core::file::hash::FileHash;
-use rusty_seed_database::{seeddb::SeedFile, Database};
+use rusty_seed_core::file::{hash::FileHash, metadata::FileMetadata};
+use rusty_seed_database::{error::DatabaseError, seeddb::SeedFileInfo, Database};
 
 pub struct DBValidator;
 
 impl DBValidator {
-    pub fn validate(seed_database: Arc<Mutex<Database>>, database_path: PathBuf) {
-        let seed_files = seed_database.lock().unwrap().get_all_seed_files();
+    pub fn validate(database: Arc<Mutex<Database>>) {
+        let database_lock = database.lock().unwrap();
+        let seed_files = database_lock.get_all_seed_files();
+        drop(database_lock);
         let mut validating_threads = Vec::new();
-        for (hash, seed_file) in seed_files {
-            let seed_database_clone = Arc::clone(&seed_database);
-            let path = database_path.clone();
+        for (hash, seed_file_info) in seed_files {
+            if !seed_file_info.active {
+                continue;
+            }
+            let seed_database_clone = Arc::clone(&database);
             let thread = thread::spawn(move || {
-                validate_seed_file(hash, seed_file, seed_database_clone, path.clone());
+                validate_seed_file(hash, seed_file_info, seed_database_clone);
             });
             validating_threads.push(thread);
         }
@@ -27,23 +30,41 @@ impl DBValidator {
     }
 }
 
-#[allow(unused_variables)]
 fn validate_seed_file(
     file_hash: FileHash,
-    seed_file: SeedFile,
-    seed_database: Arc<Mutex<Database>>,
-    mut database_path: PathBuf,
+    seed_file_info: SeedFileInfo,
+    database: Arc<Mutex<Database>>,
 ) {
-    // TODO: Read metadata from the database
-    database_path.push(file_hash.hash);
+    let database_lock = database.lock().unwrap();
+    let saved_metadata = database_lock.get_metadata(file_hash.clone());
+    drop(database_lock);
+
+    if !seed_file_info.path.exists() {
+        let database_lock = database.lock().unwrap();
+        database_lock.remove_seed_file(file_hash.clone())
+    }
+
+    let saved_metadata = match saved_metadata {
+        Ok(metadata) => metadata,
+        Err(_) => unreachable!(),
+    };
+
+    let file_metadata = match FileMetadata::from(seed_file_info.path) {
+        Ok(file_metadata) => file_metadata,
+        Err(_) => unreachable!(),
+    };
+
+    if file_metadata != saved_metadata {
+        database.lock().unwrap().remove_seed_file(file_hash);
+    }
 }
 
-#[allow(unused)]
-fn file_exists() -> bool {
-    return true;
-}
-
-#[allow(unused)]
-fn same_file_hash() -> bool {
-    return true;
+#[allow(unused_variables, unused)]
+fn handle_database_error(database_error: DatabaseError, database: Arc<Mutex<Database>>) {
+    match database_error {
+        DatabaseError::SeedFileNotFound => {}
+        DatabaseError::NoRecordFound => {}
+        DatabaseError::CustomError { error } => {}
+        DatabaseError::DatabaseNotFound => {}
+    }
 }

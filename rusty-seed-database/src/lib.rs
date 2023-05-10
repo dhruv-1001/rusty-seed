@@ -6,7 +6,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 use error::DatabaseError;
 use rusty_seed_core::file::{hash::FileHash, metadata::FileMetadata};
-use seeddb::{SeedDatabase, SeedFile};
+use seeddb::{SeedDatabase, SeedFileInfo};
 use seedfiledb::SeedFileDatabase;
 
 pub struct Database {
@@ -30,13 +30,21 @@ impl Database {
         }
     }
 
-    pub fn add_seed_file(&self, hash: FileHash, path: PathBuf) -> Result<(), DatabaseError> {
-        self.seed_db.add_seed_file(hash, path)
+    pub fn add_seed_file(&self, file_hash: FileHash, path: PathBuf) -> Result<(), DatabaseError> {
+        self.seed_db.add_seed_file(file_hash, path)
+    }
+
+    pub fn remove_seed_file(&self, file_hash: FileHash) {
+        self.seed_db.remove_seed_file(file_hash.clone()).unwrap();
     }
 
     /// Get all seed files both active & inactive
-    pub fn get_all_seed_files(&self) -> Vec<(FileHash, SeedFile)> {
+    pub fn get_all_seed_files(&self) -> Vec<(FileHash, SeedFileInfo)> {
         self.seed_db.get_all_seed_file()
+    }
+
+    pub fn check_if_seeding(&self, file_hash: FileHash) -> Result<bool, DatabaseError> {
+        self.seed_db.check_if_seeding(file_hash)
     }
 
     pub fn save_metadate(&self, file_metadata: FileMetadata) -> Result<(), DatabaseError> {
