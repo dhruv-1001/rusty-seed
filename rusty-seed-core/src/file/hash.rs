@@ -61,12 +61,6 @@ impl FileHash {
     }
 }
 
-impl AsRef<[u8]> for FileHash {
-    fn as_ref(&self) -> &[u8] {
-        self.hash.as_bytes()
-    }
-}
-
 #[cfg(test)]
 mod test {
     use crate::{file::metadata::FileMetadata, utils::default_database_path};

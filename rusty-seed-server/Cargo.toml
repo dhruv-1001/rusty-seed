@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 rusty-seed-database = { path = "../rusty-seed-database" }
 rusty-seed-core = { path = "../rusty-seed-core" }
+clap = { version = "4.2.7", features = ["derive"] }

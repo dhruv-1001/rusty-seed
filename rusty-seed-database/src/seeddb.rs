@@ -1,7 +1,7 @@
 use bincode::{deserialize, serialize};
 use rusty_seed_core::file::hash::FileHash;
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::error::DatabaseError;
 
@@ -16,9 +16,9 @@ pub struct SledDatabase {
     db: sled::Db,
 }
 
-#[allow(unused_variables)]
 impl SledDatabase {
-    pub fn open(path: &Path) -> Self {
+    pub fn open(mut path: PathBuf) -> Self {
+        path.push("seed-files-database");
         let db = sled::open(path).unwrap();
         Self { db }
     }
@@ -75,6 +75,7 @@ impl SledDatabase {
         seed_files
     }
 
+    #[allow(unused_variables)]
     pub fn mark_inactive(&mut self, hash: FileHash) {}
 }
 
@@ -90,7 +91,7 @@ mod test {
     fn test_add_and_get_file() {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push(".test-db");
-        let mut seed_db = SledDatabase::open(path.as_path());
+        let mut seed_db = SledDatabase::open(path.clone());
 
         let file_hash_one = FileHash::from_string("1234".to_owned());
         let file_path_one = PathBuf::from("path/for/test/one");

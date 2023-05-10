@@ -502,6 +502,7 @@ dependencies = [
 name = "rusty-seed-server"
 version = "0.1.0"
 dependencies = [
+ "clap",
  "rusty-seed-core",
  "rusty-seed-database",
 ]
