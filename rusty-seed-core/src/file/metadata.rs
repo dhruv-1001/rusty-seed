@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use super::error::FileError;
+use super::{error::FileError, hash::FileHash};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum FileSystem {
@@ -102,16 +102,18 @@ pub struct FileMetadata {
     pub file_system: FileSystem,
     pub seed_size: u64,
     pub can_seed: bool,
+    pub file_hash: FileHash,
 }
 
 impl FileMetadata {
     pub fn from(path: PathBuf) -> Result<Self, FileError> {
         let file_system = FileSystem::from_path(path.clone())?;
-        Ok(FileMetadata {
+        Ok(Self {
             file_path: path,
             file_system: file_system.clone(),
             seed_size: file_system.size(0),
             can_seed: true,
+            file_hash: FileHash::from(file_system),
         })
     }
 }

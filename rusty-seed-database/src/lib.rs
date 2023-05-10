@@ -4,6 +4,7 @@ pub mod seedfiledb;
 
 use std::path::PathBuf;
 
+use error::DatabaseError;
 use rusty_seed_core::file::hash::FileHash;
 use seeddb::{SeedFile, SledDatabase};
 
@@ -20,8 +21,8 @@ impl SeedDatabase {
         }
     }
 
-    pub fn add_seed_file(&mut self, hash: FileHash, path: PathBuf) {
-        self.sled.add_seed_file(hash, path);
+    pub fn add_seed_file(&mut self, hash: FileHash, path: PathBuf) -> Result<(), DatabaseError> {
+        self.sled.add_seed_file(hash, path)
     }
 
     /// Get all seed files both active & inactive

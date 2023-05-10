@@ -23,20 +23,40 @@ impl SledDatabase {
         Self { db }
     }
 
-    pub fn add_seed_file(&mut self, hash: FileHash, path: PathBuf) {
+    pub fn add_seed_file(&self, hash: FileHash, path: PathBuf) -> Result<(), DatabaseError> {
         let seed_file = SeedFile {
             path: path,
             active: true,
         };
-        let serialized_seed = serialize(&seed_file).unwrap();
         let serialized_hash = serialize(&hash).unwrap();
-        self.db.insert(serialized_hash, serialized_seed).unwrap();
+        let serialized_seed_file = serialize(&seed_file).unwrap();
+        match self.db.insert(serialized_hash, serialized_seed_file) {
+            Ok(_) => Ok(()),
+            Err(e) => {
+                return Err(DatabaseError::CustomError {
+                    error: e.to_string(),
+                })
+            }
+        }
     }
 
-    pub fn get_seed_file(&self, hash: FileHash) -> SeedFile {
+    pub fn get_seed_file(&self, hash: FileHash) -> Result<SeedFile, DatabaseError> {
         let hash = serialize(&hash).unwrap();
-        let seed_file: SeedFile = deserialize(&self.db.get(hash).unwrap().unwrap()).unwrap();
-        seed_file
+        let seed_file = match self.db.get(hash) {
+            Ok(seed_file) => seed_file,
+            Err(e) => {
+                return Err(DatabaseError::CustomError {
+                    error: e.to_string(),
+                })
+            }
+        };
+        match seed_file {
+            Some(seed_file) => {
+                let seed_file = deserialize(&seed_file).unwrap();
+                Ok(seed_file)
+            }
+            None => Err(DatabaseError::NoRecordFound),
+        }
     }
 
     pub fn remove_seed_file(&self, hash: FileHash) -> Result<(), DatabaseError> {
@@ -91,7 +111,7 @@ mod test {
     fn test_add_and_get_file() {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push(".test-db");
-        let mut seed_db = SledDatabase::open(path.clone());
+        let seed_db = SledDatabase::open(path.clone());
 
         let file_hash_one = FileHash::from_string("1234".to_owned());
         let file_path_one = PathBuf::from("path/for/test/one");
@@ -99,11 +119,15 @@ mod test {
         let file_hash_two = FileHash::from_string("5678".to_owned());
         let file_path_two = PathBuf::from("path/for/test/two");
 
-        seed_db.add_seed_file(file_hash_one.clone(), file_path_one);
-        seed_db.add_seed_file(file_hash_two.clone(), file_path_two);
+        seed_db
+            .add_seed_file(file_hash_one.clone(), file_path_one)
+            .unwrap();
+        seed_db
+            .add_seed_file(file_hash_two.clone(), file_path_two)
+            .unwrap();
 
-        let file_one = seed_db.get_seed_file(file_hash_one);
-        let file_two = seed_db.get_seed_file(file_hash_two);
+        let file_one = seed_db.get_seed_file(file_hash_one).unwrap();
+        let file_two = seed_db.get_seed_file(file_hash_two).unwrap();
 
         assert_eq!("path/for/test/one", file_one.path.to_str().unwrap());
         assert_eq!("path/for/test/two", file_two.path.to_str().unwrap());
