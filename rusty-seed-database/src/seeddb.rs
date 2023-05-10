@@ -12,11 +12,11 @@ pub struct SeedFile {
     active: bool,
 }
 
-pub struct SledDatabase {
+pub struct SeedDatabase {
     db: sled::Db,
 }
 
-impl SledDatabase {
+impl SeedDatabase {
     pub fn open(mut path: PathBuf) -> Self {
         path.push("seed-files-database");
         let db = sled::open(path).unwrap();
@@ -105,13 +105,13 @@ mod test {
 
     use rusty_seed_core::file::hash::FileHash;
 
-    use super::SledDatabase;
+    use super::SeedDatabase;
 
     #[test]
     fn test_add_and_get_file() {
         let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         path.push(".test-db");
-        let seed_db = SledDatabase::open(path.clone());
+        let seed_db = SeedDatabase::open(path.clone());
 
         let file_hash_one = FileHash::from_string("1234".to_owned());
         let file_path_one = PathBuf::from("path/for/test/one");

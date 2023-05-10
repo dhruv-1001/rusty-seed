@@ -7,7 +7,7 @@ use std::{
 };
 use validator::DBValidator;
 
-use rusty_seed_database::SeedDatabase;
+use rusty_seed_database::Database;
 
 mod local;
 mod server;
@@ -28,7 +28,7 @@ fn main() {
         None => default_database_path(),
     };
     // TODO: load database(s)
-    let seed_database = Arc::new(Mutex::new(SeedDatabase::open(path.clone())));
+    let seed_database = Arc::new(Mutex::new(Database::open(path.clone())));
     // TODO: verify downloads
     DBValidator::validate(seed_database, path);
 

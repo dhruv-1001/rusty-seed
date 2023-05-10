@@ -5,12 +5,12 @@ use std::{
 };
 
 use rusty_seed_core::file::hash::FileHash;
-use rusty_seed_database::{seeddb::SeedFile, SeedDatabase};
+use rusty_seed_database::{seeddb::SeedFile, Database};
 
 pub struct DBValidator;
 
 impl DBValidator {
-    pub fn validate(seed_database: Arc<Mutex<SeedDatabase>>, database_path: PathBuf) {
+    pub fn validate(seed_database: Arc<Mutex<Database>>, database_path: PathBuf) {
         let seed_files = seed_database.lock().unwrap().get_all_seed_files();
         let mut validating_threads = Vec::new();
         for (hash, seed_file) in seed_files {
@@ -31,7 +31,7 @@ impl DBValidator {
 fn validate_seed_file(
     file_hash: FileHash,
     seed_file: SeedFile,
-    seed_database: Arc<Mutex<SeedDatabase>>,
+    seed_database: Arc<Mutex<Database>>,
     mut database_path: PathBuf,
 ) {
     // TODO: Read metadata from the database
