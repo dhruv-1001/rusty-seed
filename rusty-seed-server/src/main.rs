@@ -32,8 +32,8 @@ fn main() {
         None => default_database_path(),
     };
 
-    info!("### Opening database at path {:?}", path.clone());
-    let database = Arc::new(Mutex::new(Database::open(path.clone())));
+    info!("### Opening database at path {:?}", path);
+    let database = Arc::new(Mutex::new(Database::open(path)));
 
     info!("### Validating database");
     DBValidator::validate(database);

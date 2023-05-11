@@ -25,11 +25,9 @@ impl SeedFileDatabase {
             .insert(serialized_hash, serialized_file_metadata)
         {
             Ok(_) => Ok(()),
-            Err(e) => {
-                return Err(DatabaseError::CustomError {
-                    error: e.to_string(),
-                })
-            }
+            Err(e) => Err(DatabaseError::CustomError {
+                error: e.to_string(),
+            }),
         }
     }
 

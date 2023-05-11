@@ -32,19 +32,14 @@ impl SeedDatabase {
         let serialized_seed_file = serialize(&seed_file).unwrap();
         match self.db.insert(serialized_hash, serialized_seed_file) {
             Ok(_) => Ok(()),
-            Err(e) => {
-                return Err(DatabaseError::CustomError {
-                    error: e.to_string(),
-                })
-            }
+            Err(e) => Err(DatabaseError::CustomError {
+                error: e.to_string(),
+            }),
         }
     }
 
     pub fn check_if_seeding(&self, file_hash: FileHash) -> Result<bool, DatabaseError> {
-        match self.get_seed_file(file_hash) {
-            Ok(seed_file_info) => Ok(seed_file_info.active),
-            Err(e) => return Err(e),
-        }
+        Ok(self.get_seed_file(file_hash)?.active)
     }
 
     fn get_seed_file(&self, file_hash: FileHash) -> Result<SeedFileInfo, DatabaseError> {

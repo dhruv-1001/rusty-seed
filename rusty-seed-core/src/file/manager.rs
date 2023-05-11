@@ -30,7 +30,7 @@ impl FileManager {
     // Returns byte vector, along with start_index and end_index of bytes read
     pub fn read(&self, index: u64, path: PathBuf) -> Result<(Vec<u8>, u64, u64), FileError> {
         let mut file_path = self.file_metadata.file_path.clone();
-        file_path.push(path.clone());
+        file_path.push(path);
 
         let mut file: Option<(PathBuf, Size)> = None;
         for (path, size) in &self.files {

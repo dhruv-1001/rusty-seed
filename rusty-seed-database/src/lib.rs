@@ -59,14 +59,14 @@ impl Database {
     pub fn save_metadate(&self, file_metadata: FileMetadata) -> Result<(), DatabaseError> {
         match self.seed_file_db.get(&file_metadata.file_hash.hash) {
             Some(seed_file_db) => seed_file_db.save_metadata(file_metadata),
-            None => return Err(DatabaseError::NoRecordFound),
+            None => Err(DatabaseError::NoRecordFound),
         }
     }
 
     pub fn get_metadata(&self, file_hash: FileHash) -> Result<FileMetadata, DatabaseError> {
         match self.seed_file_db.get(&file_hash.hash) {
             Some(seed_file_db) => seed_file_db.get_metadata(file_hash),
-            None => return Err(DatabaseError::NoRecordFound),
+            None => Err(DatabaseError::NoRecordFound),
         }
     }
 }
