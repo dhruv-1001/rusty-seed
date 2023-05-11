@@ -24,16 +24,22 @@ struct CliOpts {
 
 fn main() {
     Tracer::init();
-    info!("Starting server");
+    info!("### Starting server");
+
     let opts = CliOpts::parse();
     let path = match opts.path {
         Some(path) => path,
         None => default_database_path(),
     };
-    let database = Arc::new(Mutex::new(Database::open(path.clone())));
-    DBValidator::validate(database);
 
-    // TODO: send request to client to continue uncomplete downloads
+    info!("### Opening database at path {:?}", path.clone());
+    let database = Arc::new(Mutex::new(Database::open(path.clone())));
+
+    info!("### Validating database");
+    DBValidator::validate(database);
+    info!("### Validation finished");
+
+    // TODO: send request to client to continue uncomplete downloads [maybe client can send request to the server, to get information about what files do the client have to download]
     // TODO: start listening to incoming connections connections and start seeding active paths
     let server_handle = thread::spawn(|| {
         server::run();

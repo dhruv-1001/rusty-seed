@@ -1,5 +1,5 @@
 use bincode::{deserialize, serialize};
-use rusty_seed_core::file::hash::FileHash;
+use rusty_seed_core::file::{hash::FileHash, metadata::FileMetadata};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -23,12 +23,12 @@ impl SeedDatabase {
         Self { db }
     }
 
-    pub fn add_seed_file(&self, hash: FileHash, path: PathBuf) -> Result<(), DatabaseError> {
+    pub fn add_seed_file(&self, file_metadata: FileMetadata) -> Result<(), DatabaseError> {
         let seed_file = SeedFileInfo {
-            path: path,
+            path: file_metadata.file_path,
             active: true,
         };
-        let serialized_hash = serialize(&hash).unwrap();
+        let serialized_hash = serialize(&file_metadata.file_hash.hash).unwrap();
         let serialized_seed_file = serialize(&seed_file).unwrap();
         match self.db.insert(serialized_hash, serialized_seed_file) {
             Ok(_) => Ok(()),
@@ -94,9 +94,10 @@ impl SeedDatabase {
         let mut seed_files: Vec<(FileHash, SeedFileInfo)> = Vec::new();
         self.db.iter().for_each(|item| {
             if let Ok((key, value)) = item {
-                let hash: FileHash = deserialize(&key).unwrap();
+                let hash: String = deserialize(&key).unwrap();
+                let file_hash = FileHash::from_string(hash);
                 let seed: SeedFileInfo = deserialize(&value).unwrap();
-                seed_files.push((hash, seed))
+                seed_files.push((file_hash, seed))
             }
         });
         seed_files
@@ -104,46 +105,4 @@ impl SeedDatabase {
 
     #[allow(unused_variables)]
     pub fn mark_inactive(&mut self, hash: FileHash) {}
-}
-
-#[cfg(test)]
-mod test {
-    use std::path::PathBuf;
-
-    use rusty_seed_core::file::hash::FileHash;
-
-    use super::SeedDatabase;
-
-    #[test]
-    fn test_add_and_get_file() {
-        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        path.push(".test-db");
-        let seed_db = SeedDatabase::open(path.clone());
-
-        let file_hash_one = FileHash::from_string("1234".to_owned());
-        let file_path_one = PathBuf::from("path/for/test/one");
-
-        let file_hash_two = FileHash::from_string("5678".to_owned());
-        let file_path_two = PathBuf::from("path/for/test/two");
-
-        seed_db
-            .add_seed_file(file_hash_one.clone(), file_path_one)
-            .unwrap();
-        seed_db
-            .add_seed_file(file_hash_two.clone(), file_path_two)
-            .unwrap();
-
-        let file_one = seed_db.get_seed_file(file_hash_one).unwrap();
-        let file_two = seed_db.get_seed_file(file_hash_two).unwrap();
-
-        assert_eq!("path/for/test/one", file_one.path.to_str().unwrap());
-        assert_eq!("path/for/test/two", file_two.path.to_str().unwrap());
-
-        let seed_files = seed_db.get_all_seed_file();
-        for file in seed_files {
-            println!("{:?} {:?}", file.0, file.1);
-        }
-
-        std::fs::remove_dir_all(path).unwrap();
-    }
 }

@@ -5,6 +5,7 @@ use std::{
 
 use rusty_seed_core::file::{hash::FileHash, metadata::FileMetadata};
 use rusty_seed_database::{error::DatabaseError, seeddb::SeedFileInfo, Database};
+use tracing::{error, info};
 
 pub struct DBValidator;
 
@@ -35,28 +36,55 @@ fn validate_seed_file(
     seed_file_info: SeedFileInfo,
     database: Arc<Mutex<Database>>,
 ) {
+    info!("Validating seed {:?}", seed_file_info.path);
     let database_lock = database.lock().unwrap();
+    info!(
+        "Loading metadata for {:?} from database",
+        seed_file_info.path
+    );
     let saved_metadata = database_lock.get_metadata(file_hash.clone());
     drop(database_lock);
 
     if !seed_file_info.path.exists() {
-        let database_lock = database.lock().unwrap();
-        database_lock.remove_seed_file(file_hash.clone())
+        error!(
+            "Seed {:?} not found [REMOVING FROM DATABASE]",
+            seed_file_info.path
+        );
+        let mut database_lock = database.lock().unwrap();
+        database_lock.remove_seed_file(file_hash.clone());
     }
 
     let saved_metadata = match saved_metadata {
         Ok(metadata) => metadata,
-        Err(_) => unreachable!(),
+        Err(e) => {
+            error!(
+                "Cannot load metadata for {:?}: {:?}",
+                seed_file_info.path, e
+            );
+            return;
+        }
     };
 
-    let file_metadata = match FileMetadata::from(seed_file_info.path) {
+    let file_metadata = match FileMetadata::from(seed_file_info.path.clone()) {
         Ok(file_metadata) => file_metadata,
-        Err(_) => unreachable!(),
+        Err(e) => {
+            error!(
+                "Cannot generate metadata for {:?}: {:?}",
+                seed_file_info.path, e
+            );
+            return;
+        }
     };
 
     if file_metadata != saved_metadata {
+        error!(
+            "Changes found for seed {:?} [REMOVING FROM DATABASE]",
+            seed_file_info.path
+        );
         database.lock().unwrap().remove_seed_file(file_hash);
     }
+
+    info!("Validated seed {:?}", seed_file_info.path);
 }
 
 #[allow(unused_variables, unused)]

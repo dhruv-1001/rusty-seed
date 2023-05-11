@@ -100,7 +100,7 @@ impl FileSystem {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct FileMetadata {
     pub file_path: PathBuf,
     pub file_system: FileSystem,

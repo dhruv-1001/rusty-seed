@@ -12,6 +12,7 @@ use seedfiledb::SeedFileDatabase;
 pub struct Database {
     seed_db: SeedDatabase,
     seed_file_db: HashMap<String, SeedFileDatabase>,
+    database_path: PathBuf,
 }
 
 #[allow(unused_variables)]
@@ -27,15 +28,23 @@ impl Database {
         Self {
             seed_db,
             seed_file_db,
+            database_path: path,
         }
     }
 
-    pub fn add_seed_file(&self, file_hash: FileHash, path: PathBuf) -> Result<(), DatabaseError> {
-        self.seed_db.add_seed_file(file_hash, path)
+    pub fn add_seed_file(&mut self, file_metadata: FileMetadata) -> Result<(), DatabaseError> {
+        self.seed_db.add_seed_file(file_metadata.clone())?;
+        let seed_file_db =
+            SeedFileDatabase::open(file_metadata.file_hash.clone(), self.database_path.clone());
+        seed_file_db.save_metadata(file_metadata.clone())?;
+        self.seed_file_db
+            .insert(file_metadata.file_hash.hash, seed_file_db);
+        Ok(())
     }
 
-    pub fn remove_seed_file(&self, file_hash: FileHash) {
+    pub fn remove_seed_file(&mut self, file_hash: FileHash) {
         self.seed_db.remove_seed_file(file_hash.clone()).unwrap();
+        self.seed_file_db.remove(&file_hash.hash);
     }
 
     /// Get all seed files both active & inactive
