@@ -6,7 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sha1 = "0.10.5"
 serde = { version = "1.0.160", features = ["derive"] }
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.17", features = [ "env-filter" ]}
+crypto-hash = "0.3.4"
+hex = "0.4.3"

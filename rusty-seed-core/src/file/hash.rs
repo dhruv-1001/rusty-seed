@@ -1,17 +1,17 @@
 use std::{
     fs::File,
-    io::{BufReader, Read},
+    io::{BufReader, Read, Write},
     path::PathBuf,
 };
 
+use crypto_hash::{Algorithm, Hasher};
 use serde::{Deserialize, Serialize};
-use sha1::{digest::core_api::CoreWrapper, Digest, Sha1, Sha1Core};
 
 use crate::utils::FILE_READ_WRITE_BUFFER_SIZE;
 
 use super::metadata::FileSystem;
 
-fn hash(file_system: FileSystem, hasher: &mut CoreWrapper<Sha1Core>) {
+fn hash(file_system: FileSystem, hasher: &mut Hasher) {
     match file_system {
         FileSystem::File {
             name: _,
@@ -27,7 +27,7 @@ fn hash(file_system: FileSystem, hasher: &mut CoreWrapper<Sha1Core>) {
     }
 }
 
-fn hash_file(path: PathBuf, hasher: &mut CoreWrapper<Sha1Core>) {
+fn hash_file(path: PathBuf, hasher: &mut Hasher) {
     let file = File::open(path).unwrap();
     let mut buf_reader = BufReader::new(file);
     let mut buffer = vec![0; FILE_READ_WRITE_BUFFER_SIZE];
@@ -37,7 +37,7 @@ fn hash_file(path: PathBuf, hasher: &mut CoreWrapper<Sha1Core>) {
         if bytes_read == 0 {
             break;
         }
-        Digest::update(hasher, &buffer[..bytes_read]);
+        hasher.write_all(&buffer[..bytes_read]).unwrap();
     }
 }
 
@@ -48,11 +48,12 @@ pub struct FileHash {
 
 impl FileHash {
     pub fn from(file_system: FileSystem) -> Self {
-        let mut hasher = Sha1::new();
+        let mut hasher = Hasher::new(Algorithm::SHA1);
         hash(file_system, &mut hasher);
-        let result = hasher.finalize();
+        let result = hasher.finish();
+        let hex_string = hex::encode(result);
         Self {
-            hash: format!("{:x}", result),
+            hash: format!("{}", hex_string),
         }
     }
 

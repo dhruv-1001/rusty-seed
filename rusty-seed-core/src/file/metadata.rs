@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
-use tracing::info;
 
 use super::{error::FileError, hash::FileHash};
 
@@ -111,7 +110,6 @@ pub struct FileMetadata {
 
 impl FileMetadata {
     pub fn from(path: PathBuf) -> Result<Self, FileError> {
-        info!("Generating metadata for: {:?}", path);
         let file_system = FileSystem::from_path(path.clone())?;
         Ok(Self {
             file_path: path,
