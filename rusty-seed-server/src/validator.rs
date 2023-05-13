@@ -1,6 +1,7 @@
 use std::{
     sync::{Arc, Mutex},
     thread,
+    time::SystemTime,
 };
 
 use rusty_seed_core::file::{hash::FileHash, metadata::FileMetadata};
@@ -37,6 +38,7 @@ fn validate_seed_file(
     database: Arc<Mutex<Database>>,
 ) {
     info!("Validating seed {:?}", seed_file_info.path);
+    let validation_begin_time = SystemTime::now();
     let database_lock = database.lock().unwrap();
     info!(
         "Loading metadata for {:?} from database",
@@ -84,7 +86,13 @@ fn validate_seed_file(
         database.lock().unwrap().remove_seed_file(file_hash);
     }
 
-    info!("Validated seed {:?}", seed_file_info.path);
+    let validation_duration = SystemTime::now()
+        .duration_since(validation_begin_time)
+        .unwrap();
+    info!(
+        "Validated seed {:?} in {:?}",
+        seed_file_info.path, validation_duration
+    );
 }
 
 #[allow(unused_variables, unused)]

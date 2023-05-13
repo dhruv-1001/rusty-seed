@@ -70,3 +70,58 @@ impl Database {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use rusty_seed_core::{file::metadata::FileMetadata, utils::default_database_path};
+
+    use crate::Database;
+
+    #[test]
+    fn save_metadata() {
+        let database_path = default_database_path();
+        let mut database = Database::open(database_path.clone());
+
+        let mut path_dir1 = database_path.clone();
+        path_dir1.push("dir1");
+        let mut path_dir2 = database_path.clone();
+        path_dir2.push("dir2");
+        let mut path_dir3 = database_path.clone();
+        path_dir3.push("dir3");
+        let mut path_dir4 = database_path.clone();
+        path_dir4.push("dir4");
+        let mut path_dir5 = database_path.clone();
+        path_dir5.push("dir5");
+        let mut path_dir6 = database_path.clone();
+        path_dir6.push("dir6");
+
+        println!("1");
+        let metadata_dir1 = FileMetadata::from(path_dir1).unwrap();
+        database.add_seed_file(metadata_dir1).unwrap();
+        println!("2");
+        let metadata_dir2 = FileMetadata::from(path_dir2).unwrap();
+        database.add_seed_file(metadata_dir2).unwrap();
+        println!("3");
+        let metadata_dir3 = FileMetadata::from(path_dir3).unwrap();
+        database.add_seed_file(metadata_dir3).unwrap();
+        println!("4");
+        let metadata_dir4 = FileMetadata::from(path_dir4).unwrap();
+        database.add_seed_file(metadata_dir4).unwrap();
+        println!("5");
+        let metadata_dir5 = FileMetadata::from(path_dir5).unwrap();
+        database.add_seed_file(metadata_dir5).unwrap();
+        println!("6");
+        let metadata_dir6 = FileMetadata::from(path_dir6).unwrap();
+        database.add_seed_file(metadata_dir6).unwrap();
+    }
+
+    #[test]
+    fn read_metadata() {
+        let database_path = default_database_path();
+        let database = Database::open(database_path.clone());
+
+        for (file_hash, _) in database.get_all_seed_files() {
+            println!("{:#?}", database.get_metadata(file_hash).unwrap());
+        }
+    }
+}
