@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use crate::file::{hash::FileHash, metadata::FileMetadata};
+use crate::file::{error::FileError, hash::FileHash, metadata::FileMetadata};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ClientRequest {
@@ -32,7 +32,8 @@ pub enum LocalRequest {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum LocalResponse {
-    AddSeed { test: String },
+    AddSeed { status: String },
+    AddSeedError { file_error: FileError },
     RemoveSeed { test: String },
     SeedFiles { test: String },
 }

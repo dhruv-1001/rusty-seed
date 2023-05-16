@@ -6,7 +6,10 @@ use std::{
 };
 
 use bincode::{deserialize, serialize};
-use rusty_seed_core::api::message::{LocalRequest, LocalResponse};
+use rusty_seed_core::{
+    api::message::{LocalRequest, LocalResponse},
+    file::metadata::FileMetadata,
+};
 use rusty_seed_database::Database;
 use tracing::{info, warn};
 
@@ -49,10 +52,22 @@ fn handle_connection(mut stream: TcpStream, database: Arc<Mutex<Database>>) {
             test: "Hello".to_owned(),
         },
         LocalRequest::AddSeed { path } => {
-            let response_string = format!("Added {:?}", path);
-            LocalResponse::RemoveSeed {
-                test: response_string,
-            }
+            let metadata = FileMetadata::from(path.clone());
+            let response: LocalResponse = if metadata.is_err() {
+                LocalResponse::AddSeedError {
+                    file_error: metadata.unwrap_err(),
+                }
+            } else {
+                database
+                    .lock()
+                    .unwrap()
+                    .add_seed_file(metadata.unwrap())
+                    .unwrap();
+                LocalResponse::AddSeed {
+                    status: format!("Path {:?} now seeding", path),
+                }
+            };
+            response
         }
         LocalRequest::RemoveSeed { path } => {
             let response_string = format!("Removed {:?}", path);

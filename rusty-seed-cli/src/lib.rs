@@ -115,15 +115,15 @@ fn handle_subcommand(opts: CliOpts) {
     match opts.command {
         Command::AddSeed { path } => {
             let response: LocalResponse = cli_client.add_seed(path);
-            println!("{:#?}", response);
+            println!("\n{:#?}", response);
         }
         Command::RemoveSeed { path } => {
             let response: LocalResponse = cli_client.remove_seed(path);
-            println!("{:#?}", response);
+            println!("\n{:#?}", response);
         }
         Command::ListSeeds => {
             let response: LocalResponse = cli_client.list_seeds();
-            println!("{:#?}", response);
+            println!("\n{:#?}", response);
         }
         Command::Download {
             link,
