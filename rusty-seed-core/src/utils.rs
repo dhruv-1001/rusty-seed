@@ -8,3 +8,9 @@ pub fn default_database_path() -> PathBuf {
     path.push(".rustyseed");
     path
 }
+
+pub fn default_download_path() -> PathBuf {
+    let mut path = PathBuf::from(env!("HOME"));
+    path.push("Downloads");
+    path
+}

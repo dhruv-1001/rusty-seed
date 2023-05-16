@@ -20,3 +20,13 @@ pub enum ServerResponse {
         metadata: Option<FileMetadata>,
     },
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum LocalRequest {
+    GetSeedFiles,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum LocalResponse {
+    SeedFiles { test: String },
+}

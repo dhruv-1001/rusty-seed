@@ -584,6 +584,7 @@ dependencies = [
 name = "rusty-seed-cli"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "clap",
  "rand",
  "rusty-seed-core",
@@ -619,6 +620,7 @@ dependencies = [
 name = "rusty-seed-server"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "clap",
  "rusty-seed-core",
  "rusty-seed-database",

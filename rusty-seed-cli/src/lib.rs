@@ -1,16 +1,20 @@
 use clap::{Parser, Subcommand};
+use client::CliClient;
 use rusty_seed_core as core;
+use rusty_seed_core::api::message::LocalResponse;
+use rusty_seed_core::utils::default_download_path;
 use std::{path::PathBuf, time::SystemTime};
 use utils::{generate_test_dir, generate_test_file};
 
+mod client;
 mod utils;
 
 #[derive(Parser, Debug)]
 #[command(version)]
 pub struct CliOpts {
     /// Local port to send CLI commands to
-    #[arg(short, long, default_value = "10000")]
-    pub port: usize,
+    #[arg(short, long, default_value = "10001")]
+    pub port: u16,
 
     #[clap(subcommand)]
     command: Command,
@@ -43,6 +47,10 @@ pub enum Command {
         /// Link to that file
         #[clap(long)]
         link: String,
+
+        /// Path to download seed to [default: $HOME/Downloads]
+        #[clap(long)]
+        download_path: Option<PathBuf>,
     },
 
     /// Stops client and server
@@ -108,10 +116,21 @@ fn handle_subcommand(opts: CliOpts) {
         Command::RemovePath { path } => {
             println!("{}", path.as_path().to_str().unwrap())
         }
-        Command::ListSeedingPaths => todo!(),
+        Command::ListSeedingPaths => {
+            let mut cli_client = CliClient::from(opts.port);
+            let response: LocalResponse = cli_client.list_seeding_paths();
+            println!("{:#?}", response);
+        }
         Command::ListAllPaths => todo!(),
-        Command::Download { link } => {
-            println!("{}", link)
+        Command::Download {
+            link,
+            download_path,
+        } => {
+            let download_path = match download_path {
+                Some(download_path) => download_path,
+                None => default_download_path(),
+            };
+            println!("{}: {:?}", link, download_path);
         }
         Command::Stop => todo!(),
         Command::GenerateTestFile { name, path, size } => {

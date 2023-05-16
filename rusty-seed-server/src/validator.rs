@@ -11,7 +11,7 @@ use tracing::{error, info};
 pub struct DBValidator;
 
 impl DBValidator {
-    pub fn validate(database: Arc<Mutex<Database>>) {
+    pub fn validate(database: &Arc<Mutex<Database>>) {
         let database_lock = database.lock().unwrap();
         let seed_files = database_lock.get_all_seed_files();
         drop(database_lock);
