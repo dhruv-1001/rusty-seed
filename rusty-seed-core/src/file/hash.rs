@@ -52,9 +52,7 @@ impl FileHash {
         hash(file_system, &mut hasher);
         let result = hasher.finish();
         let hex_string = hex::encode(result);
-        Self {
-            hash: format!("{}", hex_string),
-        }
+        Self { hash: hex_string }
     }
 
     pub fn from_string(hash: String) -> Self {

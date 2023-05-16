@@ -20,7 +20,7 @@ impl DBValidator {
             if !seed_file_info.active {
                 continue;
             }
-            let seed_database_clone = Arc::clone(&database);
+            let seed_database_clone = Arc::clone(database);
             let thread = thread::spawn(move || {
                 validate_seed_file(hash, seed_file_info, seed_database_clone);
             });

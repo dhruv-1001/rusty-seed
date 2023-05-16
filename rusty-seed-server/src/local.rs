@@ -53,19 +53,14 @@ fn handle_connection(mut stream: TcpStream, database: Arc<Mutex<Database>>) {
         },
         LocalRequest::AddSeed { path } => {
             let metadata = FileMetadata::from(path.clone());
-            let response: LocalResponse = if metadata.is_err() {
-                LocalResponse::AddSeedError {
-                    file_error: metadata.unwrap_err(),
+            let response = match metadata {
+                Ok(metadata) => {
+                    database.lock().unwrap().add_seed_file(metadata).unwrap();
+                    LocalResponse::AddSeed {
+                        status: format!("Path {:?} now seeding", path),
+                    }
                 }
-            } else {
-                database
-                    .lock()
-                    .unwrap()
-                    .add_seed_file(metadata.unwrap())
-                    .unwrap();
-                LocalResponse::AddSeed {
-                    status: format!("Path {:?} now seeding", path),
-                }
+                Err(file_error) => LocalResponse::AddSeedError { file_error },
             };
             response
         }
