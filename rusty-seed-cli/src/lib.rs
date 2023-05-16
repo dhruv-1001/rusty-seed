@@ -1,12 +1,12 @@
 use clap::{Parser, Subcommand};
-use client::CliClient;
+use cliclient::CliClient;
 use rusty_seed_core as core;
 use rusty_seed_core::api::message::LocalResponse;
 use rusty_seed_core::utils::default_download_path;
 use std::{path::PathBuf, time::SystemTime};
 use utils::{generate_test_dir, generate_test_file};
 
-mod client;
+mod cliclient;
 mod utils;
 
 #[derive(Parser, Debug)]
@@ -23,24 +23,21 @@ pub struct CliOpts {
 #[derive(Subcommand, Clone, Debug)]
 pub enum Command {
     /// Add file/dir to seed
-    AddPath {
+    AddSeed {
         /// Path to file/fir
         #[clap(long)]
         path: PathBuf,
     },
 
     /// Remove file/dir from seeding
-    RemovePath {
+    RemoveSeed {
         /// Path to file/dir
         #[clap(long)]
         path: PathBuf,
     },
 
     /// List all seeding files/dir
-    ListSeedingPaths,
-
-    /// List all files
-    ListAllPaths,
+    ListSeeds,
 
     /// Download file/dir from avaiable peers
     Download {
@@ -55,6 +52,12 @@ pub enum Command {
 
     /// Stops client and server
     Stop,
+
+    /// Stops client
+    StopClient,
+
+    /// Stops server
+    StopServer,
 
     /// Generates a file for testing
     GenerateTestFile {
@@ -108,20 +111,20 @@ impl RustySeedCli {
 
 fn handle_subcommand(opts: CliOpts) {
     // TODO: create API to send requests to listener on server and client
-
+    let mut cli_client = CliClient::from(opts.port);
     match opts.command {
-        Command::AddPath { path } => {
-            println!("{}", path.as_path().to_str().unwrap())
-        }
-        Command::RemovePath { path } => {
-            println!("{}", path.as_path().to_str().unwrap())
-        }
-        Command::ListSeedingPaths => {
-            let mut cli_client = CliClient::from(opts.port);
-            let response: LocalResponse = cli_client.list_seeding_paths();
+        Command::AddSeed { path } => {
+            let response: LocalResponse = cli_client.add_seed(path);
             println!("{:#?}", response);
         }
-        Command::ListAllPaths => todo!(),
+        Command::RemoveSeed { path } => {
+            let response: LocalResponse = cli_client.remove_seed(path);
+            println!("{:#?}", response);
+        }
+        Command::ListSeeds => {
+            let response: LocalResponse = cli_client.list_seeds();
+            println!("{:#?}", response);
+        }
         Command::Download {
             link,
             download_path,
@@ -133,6 +136,8 @@ fn handle_subcommand(opts: CliOpts) {
             println!("{}: {:?}", link, download_path);
         }
         Command::Stop => todo!(),
+        Command::StopClient => todo!(),
+        Command::StopServer => todo!(),
         Command::GenerateTestFile { name, path, size } => {
             let path = match path {
                 Some(path) => path,

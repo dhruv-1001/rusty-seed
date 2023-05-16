@@ -35,7 +35,7 @@ pub fn run(port: u16, database: Arc<Mutex<Database>>) -> io::Result<()> {
 
 #[allow(unused_variables)]
 fn handle_connection(mut stream: TcpStream, database: Arc<Mutex<Database>>) {
-    let mut buffer = [0u8; 1024];
+    let mut buffer = [0u8; 1024 * 64];
     stream.read(&mut buffer).unwrap();
 
     let request: LocalRequest = deserialize(&buffer).unwrap();
@@ -45,13 +45,22 @@ fn handle_connection(mut stream: TcpStream, database: Arc<Mutex<Database>>) {
         stream.peer_addr().unwrap()
     );
     let response = match request {
-        LocalRequest::GetSeedFiles => {
-            let response = LocalResponse::SeedFiles {
-                test: "Hello".to_owned(),
-            };
-            serialize(&response).unwrap()
+        LocalRequest::ListSeeds => LocalResponse::SeedFiles {
+            test: "Hello".to_owned(),
+        },
+        LocalRequest::AddSeed { path } => {
+            let response_string = format!("Added {:?}", path);
+            LocalResponse::RemoveSeed {
+                test: response_string,
+            }
+        }
+        LocalRequest::RemoveSeed { path } => {
+            let response_string = format!("Removed {:?}", path);
+            LocalResponse::RemoveSeed {
+                test: response_string,
+            }
         }
     };
-
-    stream.write(&response[..]).unwrap();
+    let serialized_response = serialize(&response).unwrap();
+    stream.write(&serialized_response[..]).unwrap();
 }

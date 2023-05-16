@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 
 use crate::file::{hash::FileHash, metadata::FileMetadata};
@@ -23,10 +25,14 @@ pub enum ServerResponse {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum LocalRequest {
-    GetSeedFiles,
+    AddSeed { path: PathBuf },
+    RemoveSeed { path: PathBuf },
+    ListSeeds,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum LocalResponse {
+    AddSeed { test: String },
+    RemoveSeed { test: String },
     SeedFiles { test: String },
 }
