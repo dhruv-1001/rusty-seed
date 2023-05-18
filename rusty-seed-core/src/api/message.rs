@@ -32,8 +32,16 @@ pub enum LocalRequest {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum LocalResponse {
-    AddSeed { status: String },
-    AddSeedError { file_error: FileError },
-    RemoveSeed { test: String },
-    SeedFiles { test: String },
+    AddSeed {
+        status: String,
+    },
+    AddSeedError {
+        file_error: FileError,
+    },
+    RemoveSeed {
+        test: String,
+    },
+    SeedFiles {
+        seed_files: Vec<(FileHash, PathBuf)>,
+    },
 }

@@ -1,4 +1,5 @@
 use std::{
+    fmt::Display,
     fs::File,
     io::{BufReader, Read, Write},
     path::PathBuf,
@@ -57,6 +58,12 @@ impl FileHash {
 
     pub fn from_string(hash: String) -> Self {
         Self { hash }
+    }
+}
+
+impl Display for FileHash {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.hash)
     }
 }
 

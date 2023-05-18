@@ -1,6 +1,7 @@
 use std::{
     io::{self, Read, Write},
     net::{TcpListener, TcpStream},
+    path::PathBuf,
     sync::{Arc, Mutex},
     thread,
 };
@@ -8,7 +9,7 @@ use std::{
 use bincode::{deserialize, serialize};
 use rusty_seed_core::{
     api::message::{LocalRequest, LocalResponse},
-    file::metadata::FileMetadata,
+    file::{hash::FileHash, metadata::FileMetadata},
 };
 use rusty_seed_database::Database;
 use tracing::{info, warn};
@@ -48,9 +49,16 @@ fn handle_connection(mut stream: TcpStream, database: Arc<Mutex<Database>>) {
         stream.peer_addr().unwrap()
     );
     let response = match request {
-        LocalRequest::ListSeeds => LocalResponse::SeedFiles {
-            test: "Hello".to_owned(),
-        },
+        LocalRequest::ListSeeds => {
+            let seeds: Vec<(FileHash, PathBuf)> = database
+                .lock()
+                .unwrap()
+                .get_all_seed_files()
+                .iter()
+                .map(|(file_hash, seed_file_info)| (file_hash.clone(), seed_file_info.path.clone()))
+                .collect();
+            LocalResponse::SeedFiles { seed_files: seeds }
+        }
         LocalRequest::AddSeed { path } => {
             let metadata = FileMetadata::from(path.clone());
             let response = match metadata {

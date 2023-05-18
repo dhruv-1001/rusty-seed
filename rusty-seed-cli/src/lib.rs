@@ -123,7 +123,14 @@ fn handle_subcommand(opts: CliOpts) {
         }
         Command::ListSeeds => {
             let response: LocalResponse = cli_client.list_seeds();
-            println!("\n{:#?}", response);
+            if let LocalResponse::SeedFiles { seed_files } = response {
+                println!("\n All Seeds:\n");
+                for (file_hash, path) in seed_files {
+                    println!("path: {:?}\thash: {}", path, file_hash);
+                }
+            } else {
+                unreachable!()
+            }
         }
         Command::Download {
             link,
