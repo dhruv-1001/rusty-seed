@@ -5,12 +5,22 @@ This project aims to enable peer to peer file transfer somewhat like torrent, an
 
 ## Features
 - [ ] Network
-  - [ ] Works for devices on LAN 
+  - [x] Works for devices on LAN 
   - [ ] NAT traversal to connect to peers on differet network
 - [ ] Multi-threaded
-  - [ ] Client Side (TODO: Describe in detail)
-  - [ ] Server Side (TODO: Describe in detail)
+  - [ ] Client Side
+    - [ ] Start listening on port for local CLI requests 
+    - [ ] Open database to check files to be downloaded and their download status
+    - [ ] Connects to the peers to download files that are to be downloaded, and also those that are in progress
+  - [ ] Server Side
+    - [x] On start validates already added seeds (checks if there are any changes in the file)
+    - [x] Start listening on port for local Client & CLI requests
+    - [ ] Start listening on port for requests from the Internet
 - [ ] CLI commands
   - [ ] Client Side (TODO: Describe in detail)
-  - [ ] Server Side (TODO: Describe in detail)
-- [ ] Database
+    - [ ] `download --link="file link"` downloads files from provided link 
+  - [ ] Server Side 
+    - [x] `list-seeds` lists all seeding paths
+    - [x] `add-seed --path=path/to/file` add file to seeding list
+    - [ ] `remove-seed --path=path/to/file` remove file from seeding list
+  
