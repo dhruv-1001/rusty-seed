@@ -23,4 +23,18 @@ This project aims to enable peer to peer file transfer somewhat like torrent, an
     - [x] `list-seeds` lists all seeding paths
     - [x] `add-seed --path=path/to/file` add file to seeding list
     - [ ] `remove-seed --path=path/to/file` remove file from seeding list
-  
+
+### Setup Requirements
+[Rust](https://www.rust-lang.org/tools/install). Install rust using
+```
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+Clone the project build the project
+```
+git clone https://github.com/dhruv-1001/rusty-seed.git
+cd rusty-seed
+caro build 
+```
+
+- [ ] TODO: add bash script to build and run the project
