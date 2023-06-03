@@ -46,18 +46,20 @@ fn main() {
     DBValidator::validate(&database);
     info!("### Validation finished");
 
-    // TODO: send request to client to continue uncomplete downloads
-    // [maybe client can send request to the server, to get information about what files do the client have to download]
-    // TODO: start listening to incoming connections connections and start seeding active paths
-    let server_handle = thread::spawn(|| {
-        server::run();
-    });
-
     // TODO: start listening on a port for requests from cli & client
     let local_database = Arc::clone(&database);
     let local_handle = thread::spawn(move || {
         local::run(opts.local_port, Arc::clone(&local_database)).unwrap();
     });
+
+    // TODO: send request to client to continue uncomplete downloads
+    // [maybe client can send request to the server, to get information about what files do the client have to download]
+    // TODO: start listening to incoming connections connections and start seeding active paths
+    let server_database = Arc::clone(&database);
+    let server_handle = thread::spawn(move || {
+        server::run(opts.port, Arc::clone(&server_database)).unwrap();
+    });
+
 
     local_handle.join().unwrap();
     server_handle.join().unwrap();
