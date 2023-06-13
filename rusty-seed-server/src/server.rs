@@ -1,7 +1,8 @@
-use std::{sync::{Arc, Mutex}, net::{TcpListener, TcpStream}, io, thread};
+use std::{sync::{Arc, Mutex}, net::{TcpListener, TcpStream}, io::{self, Read}, thread};
 
+use rusty_seed_core::utils::MESSAGE_HEADER_SIZE;
 use rusty_seed_database::Database;
-use tracing::{info, warn};
+use tracing::{info, warn, error};
 
 pub fn run(port: u16, database: Arc<Mutex<Database>>) -> io::Result<()> {
     
@@ -29,5 +30,19 @@ pub fn run(port: u16, database: Arc<Mutex<Database>>) -> io::Result<()> {
 
 #[allow(unused_variables)]
 fn handle_connection(mut stream: TcpStream, database: Arc<Mutex<Database>>) {
-
+    let mut message_header_buffer = [0u8; MESSAGE_HEADER_SIZE];
+    loop {
+        match stream.read(&mut message_header_buffer) {
+            Ok(size) => {
+                if size == 0 {
+                    error!("Client disconnected: {}", stream.peer_addr().unwrap());
+                    break;
+                }
+            },
+            Err(e) => {
+                error!("Error reading from client {}: {}", stream.peer_addr().unwrap(), e);
+                return;
+            },
+        }
+    }
 }
