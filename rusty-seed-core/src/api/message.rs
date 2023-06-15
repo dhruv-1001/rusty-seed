@@ -5,6 +5,9 @@ use serde::{Deserialize, Serialize};
 use crate::file::{error::FileError, hash::FileHash, metadata::FileMetadata};
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct MessageHeader(pub u32);
+
+#[derive(Debug, Serialize, Deserialize)]
 pub enum ClientRequest {
     Connect,
 
