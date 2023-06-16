@@ -68,7 +68,7 @@ fn validate_seed_file(
     };
 
     info!("Generation metadata for {:?}", seed_file_info.path);
-    let file_metadata = match FileMetadata::from(seed_file_info.path.clone()) {
+    let file_metadata = match FileMetadata::from(seed_file_info.path.clone(), None) {
         Ok(file_metadata) => file_metadata,
         Err(e) => {
             error!(

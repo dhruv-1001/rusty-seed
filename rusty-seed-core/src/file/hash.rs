@@ -78,7 +78,7 @@ mod test {
         let mut path = default_database_path();
         path.push("test-dir");
 
-        let file_system = FileMetadata::from(path).unwrap().file_system;
+        let file_system = FileMetadata::from(path, None).unwrap().file_system;
         let file_hash = FileHash::from(file_system);
         println!("{}", file_hash.hash);
     }

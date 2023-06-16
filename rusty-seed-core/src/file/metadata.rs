@@ -109,13 +109,17 @@ pub struct FileMetadata {
 }
 
 impl FileMetadata {
-    pub fn from(path: PathBuf) -> Result<Self, FileError> {
+    pub fn from(path: PathBuf, hash: Option<String>) -> Result<Self, FileError> {
         let file_system = FileSystem::from_path(path.clone())?;
+        let file_hash = match hash {
+            Some(file_hash) => FileHash::from_string(file_hash),
+            None => FileHash::from(file_system.clone()),
+        };
         Ok(Self {
             file_path: path,
             file_system: file_system.clone(),
             seed_size: file_system.size(),
-            file_hash: FileHash::from(file_system),
+            file_hash,
         })
     }
 }
@@ -131,7 +135,7 @@ mod test {
         let mut path = default_database_path();
         path.push("test-dir");
 
-        let file_metadata = FileMetadata::from(path).unwrap();
+        let file_metadata = FileMetadata::from(path, None).unwrap();
         println!("{:#?}", file_metadata);
     }
 }

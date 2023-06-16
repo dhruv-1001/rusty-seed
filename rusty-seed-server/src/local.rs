@@ -60,7 +60,7 @@ fn handle_connection(mut stream: TcpStream, database: Arc<Mutex<Database>>) {
             LocalResponse::SeedFiles { seed_files: seeds }
         }
         LocalRequest::AddSeed { path } => {
-            let metadata = FileMetadata::from(path.clone());
+            let metadata = FileMetadata::from(path.clone(), None);
             let response = match metadata {
                 Ok(metadata) => {
                     database.lock().unwrap().add_seed_file(metadata).unwrap();

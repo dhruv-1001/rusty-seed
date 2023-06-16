@@ -96,22 +96,22 @@ mod test {
         path_dir6.push("dir6");
 
         println!("1");
-        let metadata_dir1 = FileMetadata::from(path_dir1).unwrap();
+        let metadata_dir1 = FileMetadata::from(path_dir1, None).unwrap();
         database.add_seed_file(metadata_dir1).unwrap();
         println!("2");
-        let metadata_dir2 = FileMetadata::from(path_dir2).unwrap();
+        let metadata_dir2 = FileMetadata::from(path_dir2, None).unwrap();
         database.add_seed_file(metadata_dir2).unwrap();
         println!("3");
-        let metadata_dir3 = FileMetadata::from(path_dir3).unwrap();
+        let metadata_dir3 = FileMetadata::from(path_dir3, None).unwrap();
         database.add_seed_file(metadata_dir3).unwrap();
         println!("4");
-        let metadata_dir4 = FileMetadata::from(path_dir4).unwrap();
+        let metadata_dir4 = FileMetadata::from(path_dir4, None).unwrap();
         database.add_seed_file(metadata_dir4).unwrap();
         println!("5");
-        let metadata_dir5 = FileMetadata::from(path_dir5).unwrap();
+        let metadata_dir5 = FileMetadata::from(path_dir5, None).unwrap();
         database.add_seed_file(metadata_dir5).unwrap();
         println!("6");
-        let metadata_dir6 = FileMetadata::from(path_dir6).unwrap();
+        let metadata_dir6 = FileMetadata::from(path_dir6, None).unwrap();
         database.add_seed_file(metadata_dir6).unwrap();
     }
 
